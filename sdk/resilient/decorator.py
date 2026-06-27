@@ -95,10 +95,32 @@ def _backoff(strategy: RetryStrategy, attempt: int) -> float:
     return delay
 
 
+import threading
+
+_bg_loop: asyncio.AbstractEventLoop | None = None
+_bg_loop_lock = threading.Lock()
+
+
+def _get_bg_loop() -> asyncio.AbstractEventLoop:
+    global _bg_loop
+    if _bg_loop is not None:
+        return _bg_loop
+    with _bg_loop_lock:
+        if _bg_loop is not None:
+            return _bg_loop
+        loop = asyncio.new_event_loop()
+        t = threading.Thread(target=loop.run_forever, daemon=True)
+        t.start()
+        _bg_loop = loop
+    return _bg_loop
+
+
 def _fire_and_forget(coro: Any) -> None:
-    """Run an async coroutine from sync context without blocking."""
+    """Schedule an async coroutine without blocking the caller."""
     try:
+        # Inside an async context — schedule as a task on the running loop
         loop = asyncio.get_running_loop()
         loop.create_task(coro)
     except RuntimeError:
-        asyncio.run(coro)
+        # Sync context — submit to the persistent background loop
+        asyncio.run_coroutine_threadsafe(coro, _get_bg_loop())

@@ -1,4 +1,4 @@
-module github.com/abhishekgit03/resilient-sdk/cli
+module github.com/abhishekgit03/resilient-sdk/resilient
 
 go 1.26.4
 

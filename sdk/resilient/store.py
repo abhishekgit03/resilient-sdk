@@ -32,10 +32,10 @@ CREATE INDEX IF NOT EXISTS idx_events_service_ts
 CREATE TABLE IF NOT EXISTS resilient.stats (
     id           BIGSERIAL PRIMARY KEY,
     service      TEXT        NOT NULL,
-    window       TEXT        NOT NULL,  -- e.g. '1h', '24h', '7d'
+    time_window  TEXT        NOT NULL,
     failure_rate FLOAT       NOT NULL,
-    p95_latency  INT,                   -- ms
-    peak_hour    INT,                   -- 0-23 UTC
+    p95_latency  INT,
+    peak_hour    INT,
     computed_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 """
