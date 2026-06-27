@@ -50,15 +50,29 @@ go install github.com/abhishekgit03/resilient-sdk/cli@latest
 
 ## Setup
 
-### 1. Configure
+### 1. Install the CLI
+
+```bash
+go install github.com/abhishekgit03/resilient-sdk/resilient@latest
+```
+
+### 2. Configure
+
+Point it at your existing Postgres database and add your Gemini API key:
 
 ```bash
 resilient init --dsn postgresql://user:pass@host/dbname --gemini-key AIza...
 ```
 
-This writes `~/.resilient/config.toml`. The SDK reads the same file.
+This writes `~/.resilient/config.toml`. The SDK reads the same file automatically - no extra config needed in your Python app.
 
-### 2. Use the decorator
+### 3. Install the SDK
+
+```bash
+pip install resilient-sdk-core
+```
+
+### 4. Add the decorator
 
 ```python
 from resilient import retry
@@ -73,7 +87,15 @@ async def call_openai(prompt: str):
     return await openai.chat.completions.create(...)
 ```
 
-### 3. Optional - Circuit Breaker
+Run your app normally. Every retry event is now recorded to your Postgres database. Use the CLI to inspect it:
+
+```bash
+resilient report
+resilient explain openai
+resilient anomalies
+```
+
+### 5. Optional - Circuit Breaker
 
 Pair with the circuit breaker to stop retrying a service that's fully down:
 
