@@ -48,9 +48,10 @@ jobs:
         run: pip install poetry
 
       - name: Build and publish
-        working-directory: sdk
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         run: |
+          cp README.md sdk/README.md
+          cd sdk
           poetry build
           poetry publish
