@@ -12,11 +12,15 @@ import (
 )
 
 type Config struct {
-	DSN     string `toml:"dsn"`
-	AppName string `toml:"app_name"`
+	DSN          string `toml:"dsn"`
+	AppName      string `toml:"app_name"`
+	GeminiAPIKey string `toml:"gemini_api_key"`
 }
 
 var DB *pgxpool.Pool
+
+// Cfg is the loaded config, available to all subcommands.
+var Cfg Config
 
 var rootCmd = &cobra.Command{
 	Use:   "resilient",
@@ -40,6 +44,7 @@ func init() {
 	rootCmd.AddCommand(reportCmd)
 	rootCmd.AddCommand(anomaliesCmd)
 	rootCmd.AddCommand(topCmd)
+	rootCmd.AddCommand(explainCmd)
 }
 
 func connectDB() error {
@@ -57,6 +62,7 @@ func connectDB() error {
 	}
 
 	DB = pool
+	Cfg = cfg
 	return nil
 }
 

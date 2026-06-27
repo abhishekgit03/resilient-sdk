@@ -8,24 +8,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var dsn string
+var (
+	dsn       string
+	geminiKey string
+)
 
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Configure the resilient CLI with your Postgres DSN",
-	Example: `  resilient init --dsn postgresql://postgres:postgres@localhost/resilient`,
+	Short: "Configure the resilient CLI with your Postgres DSN and Gemini API key",
+	Example: `  resilient init --dsn postgresql://postgres:postgres@localhost/resilient --gemini-key AIza...`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if dsn == "" {
 			return fmt.Errorf("--dsn is required")
 		}
 
 		path := configPath()
-
 		if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 			return fmt.Errorf("create config dir: %w", err)
 		}
 
-		content := fmt.Sprintf("dsn = %q\napp_name = \"app\"\n", dsn)
+		content := fmt.Sprintf("dsn = %q\napp_name = \"app\"\ngemini_api_key = %q\n", dsn, geminiKey)
 		if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 			return fmt.Errorf("write config: %w", err)
 		}
@@ -37,4 +39,5 @@ var initCmd = &cobra.Command{
 
 func init() {
 	initCmd.Flags().StringVar(&dsn, "dsn", "", "Postgres connection string (required)")
+	initCmd.Flags().StringVar(&geminiKey, "gemini-key", "", "Gemini API key for resilient explain")
 }
