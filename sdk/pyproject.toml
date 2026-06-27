@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "resilient-sdk"
+version = "0.1.0"
+description = "Adaptive retry SDK with persistent failure memory"
+authors = ["Abhishek Dasgupta"]
+readme = "README.md"
+packages = [{ include = "resilient" }]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+asyncpg = "^0.29"      
+tomli = "^2.0"          
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-asyncio = "^0.23"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
