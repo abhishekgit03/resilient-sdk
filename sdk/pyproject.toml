@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "resilient-sdk"
+name = "resilient-sdk-core"
 version = "0.1.0"
 description = "Adaptive retry SDK with persistent failure memory"
 authors = ["Abhishek Dasgupta <abhishek_dasgupta@zykrr.com>"]

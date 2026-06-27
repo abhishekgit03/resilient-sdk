@@ -33,7 +33,7 @@ $ resilient anomalies
 ### Python SDK
 
 ```bash
-pip install resilient-sdk
+pip install resilient-sdk-core
 ```
 
 Requires Python 3.10+ and a Postgres database.
