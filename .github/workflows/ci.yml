@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-sdk:
+    name: Python SDK tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install asyncpg tomli pytest pytest-asyncio
+        working-directory: sdk
+
+      - name: Run tests
+        run: pytest tests/ -v
+        working-directory: sdk
+
+  build-cli:
+    name: Go CLI build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Build
+        run: go build ./...
+        working-directory: cli
+
+      - name: Vet
+        run: go vet ./...
+        working-directory: cli
