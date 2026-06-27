@@ -9,10 +9,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var topLast string
+
 var topCmd = &cobra.Command{
 	Use:   "top",
-	Short: "Show the worst-performing services in the last hour",
+	Short: "Show the worst-performing services in a time window",
+	Example: `  resilient top
+  resilient top --last 24h`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		interval, err := toPostgresInterval(topLast)
+		if err != nil {
+			return err
+		}
+
 		query := `
 			SELECT
 				service,
@@ -26,14 +35,14 @@ var topCmd = &cobra.Command{
 				MAX(attempt)                                        AS max_attempts,
 				ROUND(AVG(duration_ms))                             AS avg_ms
 			FROM resilient.events
-			WHERE ts >= now() - interval '1 hour'
+			WHERE ts >= now() - $1::interval
 			GROUP BY service, fn
 			HAVING COUNT(*) FILTER (WHERE status = 'failure') > 0
 			ORDER BY failure_pct DESC, failures DESC
 			LIMIT 10
 		`
 
-		rows, err := DB.Query(context.Background(), query)
+		rows, err := DB.Query(context.Background(), query, interval)
 		if err != nil {
 			return fmt.Errorf("query: %w", err)
 		}
@@ -64,12 +73,16 @@ var topCmd = &cobra.Command{
 		}
 
 		if !found {
-			fmt.Println("No failures in the last hour.")
+			fmt.Printf("No failures in the last %s.\n", topLast)
 			return nil
 		}
 
-		fmt.Println("\nTop offenders: last 1 hour\n")
+		fmt.Printf("\nTop offenders: last %s\n\n", topLast)
 		table.Render()
 		return nil
 	},
+}
+
+func init() {
+	topCmd.Flags().StringVar(&topLast, "last", "1h", "Time window: 1h, 24h, 7d, 30d")
 }

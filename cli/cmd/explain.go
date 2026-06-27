@@ -86,7 +86,8 @@ func fetchServiceStats(service, interval string) (string, error) {
 
 	var lines []string
 	for rows.Next() {
-		var fn, topErrorType string
+		var fn string
+		var topErrorType *string // nullable — NULL on success-only functions
 		var total, failures, maxAttempts, peakHour int
 		var failurePct, p95 float64
 
@@ -94,9 +95,14 @@ func fetchServiceStats(service, interval string) (string, error) {
 			return "", err
 		}
 
+		errorLabel := "none"
+		if topErrorType != nil {
+			errorLabel = *topErrorType
+		}
+
 		lines = append(lines, fmt.Sprintf(
 			"function=%s total=%d failures=%d failure_pct=%.2f%% p95_ms=%.0f max_attempts=%d top_error=%s peak_hour_utc=%d",
-			fn, total, failures, failurePct, p95, maxAttempts, topErrorType, peakHour,
+			fn, total, failures, failurePct, p95, maxAttempts, errorLabel, peakHour,
 		))
 	}
 
